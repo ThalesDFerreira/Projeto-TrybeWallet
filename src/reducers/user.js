@@ -1,10 +1,10 @@
 import { EMAIL_ACTION } from '../actions';
 
 const INITIAL_STATE = {
-  email: '',
+  email: '', // string que armazena o email da pessoa usuária
 };
 
-const userReducer = (state = INITIAL_STATE, action) => {
+const reducer = (state = INITIAL_STATE, action) => {
   switch (action.type) {
   case EMAIL_ACTION:
     return { ...state, email: action.email };
@@ -13,4 +13,4 @@ const userReducer = (state = INITIAL_STATE, action) => {
   }
 };
 
-export default userReducer;
+export default reducer;

@@ -19,8 +19,8 @@ class Login extends React.Component {
   buttonDisableEnable = () => {
     const { password, email } = this.state;
     const limitNumber = 6;
-    const re = /\S+@\S+\.\S+/;
-    if (password.length >= limitNumber && re.test(email) === true) {
+    const verifyEmail = /\S+@\S+\.\S+/;
+    if (password.length >= limitNumber && verifyEmail.test(email) === true) {
       this.setState({ button: false });
     } else {
       this.setState({ button: true });
