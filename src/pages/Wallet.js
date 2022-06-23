@@ -20,7 +20,7 @@ class Wallet extends React.Component {
   }
 
   render() {
-    const { userEmail } = this.props;
+    const { userEmail, getWalletCurrencies } = this.props;
     return (
       <div>
         <header>
@@ -40,6 +40,45 @@ class Wallet extends React.Component {
             <span data-testid="header-currency-field">BRL</span>
           </div>
         </header>
+        <form>
+          <label htmlFor="despesas">
+            Despesas:
+            {' '}
+            <input data-testid="value-input" type="number" id="despesas" />
+          </label>
+          <label htmlFor="descricao">
+            Descrição:
+            {' '}
+            <input data-testid="description-input" type="text" id="descricao" />
+          </label>
+          <label htmlFor="Moeda">
+            Moeda:
+            {' '}
+            <select id="Moeda">
+              {getWalletCurrencies.map((el) => <option key={ el }>{ el }</option>)}
+            </select>
+          </label>
+          <label htmlFor="pagamento">
+            Método de Pagamento:
+            {' '}
+            <select data-testid="method-input" id="pagamento">
+              <option value="dinheiro">Dinheiro</option>
+              <option value="cartao-de-credito">Cartão de crédito</option>
+              <option value="cartao-de-debito">Cartão de débito</option>
+            </select>
+          </label>
+          <label htmlFor="categ">
+            Categoria de Despesas:
+            {' '}
+            <select data-testid="tag-input" id="categ">
+              <option value="alimentacao">Alimentação</option>
+              <option value="lazer">Lazer</option>
+              <option value="trabalho">Trabalho</option>
+              <option value="transporte">Transporte</option>
+              <option value="saude">Saúde</option>
+            </select>
+          </label>
+        </form>
       </div>
     );
   }
@@ -48,10 +87,15 @@ class Wallet extends React.Component {
 Wallet.propTypes = {
   userEmail: PropTypes.string.isRequired,
   walletCurrencies: PropTypes.func.isRequired,
-  // dispatch: PropTypes.func.isRequired,
+  getWalletCurrencies: PropTypes.arrayOf(
+    PropTypes.string.isRequired,
+  ).isRequired,
 };
 
-const mapStateToProps = (state) => ({ userEmail: state.user.email });
+const mapStateToProps = (state) => ({
+  userEmail: state.user.email,
+  getWalletCurrencies: state.wallet.currencies,
+});
 
 const mapDispatchToProps = (dispatch) => ({
   walletCurrencies: (currencies) => dispatch(infoWallet(currencies)),
