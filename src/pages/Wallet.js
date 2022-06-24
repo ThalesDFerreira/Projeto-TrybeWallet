@@ -90,13 +90,12 @@ class Wallet extends React.Component {
 
   sumValue = async () => {
     const { getWalletExpenses } = this.props;
-    const valorDosElementos = getWalletExpenses.map((element) => {
-      const { currency } = element;
-      return ((element.value)
-      * (element.exchangeRates[currency].ask));
-    });
-    const somaTotalElementos = valorDosElementos.reduce((crr, acc) => (
-      ((crr) + (acc))));
+    const somaTotalElementos = getWalletExpenses.reduce((acc, crr) => {
+      const soma = crr.value * crr.exchangeRates[crr.currency].ask;
+      acc += soma;
+      return acc;
+    }, 0);
+    // return somaTotalElementos;
     this.setState({ total: somaTotalElementos });
   }
 
