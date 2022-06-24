@@ -66,11 +66,15 @@ class Wallet extends React.Component {
     const { walletExpenses } = this.props;
     await walletExpenses(newExpenses);
     const { getWalletExpenses } = this.props;
-    const quantidadeExpenses = getWalletExpenses.length;
-    this.setState({ id: quantidadeExpenses });
+    const quantidadeExpenses = getWalletExpenses[getWalletExpenses.length - 1].id;
+    this.setState({ id: quantidadeExpenses + 1 });
     this.sumValue();
     this.cleanInputs();
   }
+
+  setId = (id) => this.setState({ id })
+
+  setTotal = (total) => this.setState({ total })
 
   cleanInputs = () => {
     this.setState({
@@ -112,7 +116,7 @@ class Wallet extends React.Component {
             <span
               data-testid="total-field"
             >
-              { total }
+              { Number(total).toFixed(2) }
             </span>
           </div>
           <div>
@@ -203,7 +207,7 @@ class Wallet extends React.Component {
             Adicionar despesa
           </button>
         </form>
-        <TableWallet />
+        <TableWallet setId={ this.setId } setTotal={ this.setTotal } />
       </div>
     );
   }

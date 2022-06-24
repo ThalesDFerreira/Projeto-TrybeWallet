@@ -1,8 +1,28 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { updateExpensesWallet } from '../actions';
 
 class TableWallet extends React.Component {
+  deleteExpense = (element) => {
+    const { dadosAtualizados, dados, setId, setTotal } = this.props;
+    const elementsUpdated = dados.filter((el) => el.id !== element.id);
+    dadosAtualizados(elementsUpdated);
+    let maiorId = 0;
+    if (elementsUpdated.length > 0) {
+      maiorId = elementsUpdated[elementsUpdated.length - 1].id;
+      setId(maiorId + 1);
+    } else {
+      setId(maiorId);
+    }
+    let total = 0;
+    elementsUpdated.forEach((elem) => {
+      const { currency } = elem;
+      total += (elem.value * elem.exchangeRates[currency].ask);
+    });
+    setTotal(total);
+  };
+
   render() {
     const { dados } = this.props;
     return (
@@ -35,7 +55,17 @@ class TableWallet extends React.Component {
                 <td>{ Number(el.exchangeRates[currency].ask).toFixed(2) }</td>
                 <td>{ (el.value * el.exchangeRates[currency].ask).toFixed(2) }</td>
                 <td>{ el.exchangeRates[currency].name }</td>
-                <td>edit</td>
+                <td>
+                  <button type="button">Editar</button>
+                  <button
+                    data-testid="delete-btn"
+                    type="button"
+                    onClick={ () => this.deleteExpense(el) }
+                  >
+                    Deletar
+                  </button>
+
+                </td>
               </tr>);
           })}
 
@@ -49,10 +79,18 @@ TableWallet.propTypes = {
   dados: PropTypes.arrayOf(
     PropTypes.object.isRequired,
   ).isRequired,
+  dadosAtualizados: PropTypes.func.isRequired,
+  setId: PropTypes.func.isRequired,
+  setTotal: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
   dados: state.wallet.expenses,
+
 });
 
-export default connect(mapStateToProps)(TableWallet);
+const mapDispatchToProps = (dispatch) => ({
+  dadosAtualizados: (expenses) => dispatch(updateExpensesWallet(expenses)),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(TableWallet);
