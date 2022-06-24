@@ -1,14 +1,28 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { infoWallet } from '../actions';
+import { currenciesWallet, expensesWallet } from '../actions';
+
+const ALIMENTACAO = 'Alimentação';
 
 class Wallet extends React.Component {
-  componentDidMount() {
-    this.fetchApi();
+  state = {
+    id: 0,
+    value: 0,
+    currency: 'USD',
+    method: 'Dinheiro',
+    tag: ALIMENTACAO,
+    description: '',
+    exchangeRates: {},
+    total: 0,
+    button: true,
   }
 
-  fetchApi = () => {
+  componentDidMount() {
+    this.fetchApiCurrencies();
+  }
+
+  fetchApiCurrencies = () => {
     const url = 'https://economia.awesomeapi.com.br/json/all';
     const { walletCurrencies } = this.props;
     const responses = fetch(url)
@@ -19,8 +33,68 @@ class Wallet extends React.Component {
     return responses;
   }
 
+  fetchApiAllCurrencies = () => {
+    const url = 'https://economia.awesomeapi.com.br/json/all';
+    const responses = fetch(url)
+      .then((resp) => resp.json())
+      .then((json) => this.setState({ exchangeRates: json }));
+    return responses;
+  }
+
+  onInputChange = (event) => {
+    const { name } = event.target;
+    this.setState({ [name]: event.target.value }, () => this.buttonDisableEnable());
+  };
+
+  buttonDisableEnable = () => {
+    const { value, description } = this.state;
+    if (value !== 0 && description !== '') {
+      this.setState({ button: false });
+    } else {
+      this.setState({ button: true });
+    }
+  }
+
+  saveExpenses = async (event) => {
+    event.preventDefault();
+    await this.fetchApiAllCurrencies();
+    const { id, value, currency, method, tag, description, exchangeRates } = this.state;
+    const newExpenses = { id, value, currency, method, tag, description, exchangeRates };
+    const { walletExpenses } = this.props;
+    await walletExpenses(newExpenses);
+    const { getWalletExpenses } = this.props;
+    const quantidadeExpenses = getWalletExpenses.length;
+    this.setState({ id: quantidadeExpenses });
+    this.sumValue();
+    this.cleanInputs();
+  }
+
+  cleanInputs = () => {
+    this.setState({
+      value: '',
+      currency: 'USD',
+      method: 'Dinheiro',
+      tag: ALIMENTACAO,
+      description: '',
+      button: true,
+    });
+  }
+
+  sumValue = () => {
+    const { getWalletExpenses } = this.props;
+    const valorDosElementos = getWalletExpenses.map((element) => {
+      const { currency } = element;
+      return ((element.value)
+      * (element.exchangeRates[currency].ask));
+    });
+    const somaTotalElementos = valorDosElementos.reduce((crr, acc) => (
+      ((crr) + (acc))));
+    this.setState({ total: somaTotalElementos.toFixed(2) });
+  }
+
   render() {
     const { userEmail, getWalletCurrencies } = this.props;
+    const { button, total, value, currency, method, tag, description } = this.state;
     return (
       <div>
         <header>
@@ -30,9 +104,13 @@ class Wallet extends React.Component {
             <span data-testid="email-field">{ userEmail }</span>
           </div>
           <div>
-            Total:
+            Total: R$
             {' '}
-            <span data-testid="total-field">{0}</span>
+            <span
+              data-testid="total-field"
+            >
+              { total }
+            </span>
           </div>
           <div>
             Câmbio:
@@ -41,43 +119,86 @@ class Wallet extends React.Component {
           </div>
         </header>
         <form>
-          <label htmlFor="despesas">
+          <label htmlFor="value">
             Despesas:
             {' '}
-            <input data-testid="value-input" type="number" id="despesas" />
+            <input
+              name="value"
+              data-testid="value-input"
+              type="number"
+              id="value"
+              value={ value }
+              onChange={ this.onInputChange }
+              placeholder="0"
+            />
           </label>
-          <label htmlFor="descricao">
+          <label htmlFor="description">
             Descrição:
             {' '}
-            <input data-testid="description-input" type="text" id="descricao" />
+            <input
+              name="description"
+              data-testid="description-input"
+              type="text"
+              id="description"
+              value={ description }
+              onChange={ this.onInputChange }
+            />
           </label>
           <label htmlFor="Moeda">
             Moeda:
             {' '}
-            <select id="Moeda">
-              {getWalletCurrencies.map((el) => <option key={ el }>{ el }</option>)}
+            <select
+              id="Moeda"
+              name="currency"
+              value={ currency }
+              onChange={ this.onInputChange }
+            >
+              {getWalletCurrencies
+                .map((el) => (
+                  <option key={ el }>
+                    { el }
+                  </option>))}
             </select>
           </label>
           <label htmlFor="pagamento">
             Método de Pagamento:
             {' '}
-            <select data-testid="method-input" id="pagamento">
-              <option value="dinheiro">Dinheiro</option>
-              <option value="cartao-de-credito">Cartão de crédito</option>
-              <option value="cartao-de-debito">Cartão de débito</option>
+            <select
+              data-testid="method-input"
+              id="pagamento"
+              name="method"
+              value={ method }
+              onChange={ this.onInputChange }
+            >
+              <option>Dinheiro</option>
+              <option>Cartão de crédito</option>
+              <option>Cartão de débito</option>
             </select>
           </label>
           <label htmlFor="categ">
             Categoria de Despesas:
             {' '}
-            <select data-testid="tag-input" id="categ">
-              <option value="alimentacao">Alimentação</option>
-              <option value="lazer">Lazer</option>
-              <option value="trabalho">Trabalho</option>
-              <option value="transporte">Transporte</option>
-              <option value="saude">Saúde</option>
+            <select
+              name="tag"
+              data-testid="tag-input"
+              id="categ"
+              value={ tag }
+              onChange={ this.onInputChange }
+            >
+              <option>Alimentação</option>
+              <option>Lazer</option>
+              <option>Trabalho</option>
+              <option>Transporte</option>
+              <option>Saúde</option>
             </select>
           </label>
+          <button
+            type="submit"
+            onClick={ this.saveExpenses }
+            disabled={ button }
+          >
+            Adicionar despesa
+          </button>
         </form>
       </div>
     );
@@ -85,20 +206,26 @@ class Wallet extends React.Component {
 }
 
 Wallet.propTypes = {
+  walletExpenses: PropTypes.func.isRequired,
   userEmail: PropTypes.string.isRequired,
   walletCurrencies: PropTypes.func.isRequired,
   getWalletCurrencies: PropTypes.arrayOf(
     PropTypes.string.isRequired,
+  ).isRequired,
+  getWalletExpenses: PropTypes.arrayOf(
+    PropTypes.object.isRequired,
   ).isRequired,
 };
 
 const mapStateToProps = (state) => ({
   userEmail: state.user.email,
   getWalletCurrencies: state.wallet.currencies,
+  getWalletExpenses: state.wallet.expenses,
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  walletCurrencies: (currencies) => dispatch(infoWallet(currencies)),
+  walletCurrencies: (currencies) => dispatch(currenciesWallet(currencies)),
+  walletExpenses: (expenses) => dispatch(expensesWallet(expenses)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Wallet);
