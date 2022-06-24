@@ -30,11 +30,11 @@ class TableWallet extends React.Component {
                 <td>{ el.description }</td>
                 <td>{ el.tag }</td>
                 <td>{ el.method }</td>
-                <td>{ el.value }</td>
-                <td>{ el.currency }</td>
-                <td>{ el.exchangeRates[currency].ask }</td>
+                <td>{ Number(el.value).toFixed(2) }</td>
+                <td>Real</td>
+                <td>{ Number(el.exchangeRates[currency].ask).toFixed(2) }</td>
                 <td>{ (el.value * el.exchangeRates[currency].ask).toFixed(2) }</td>
-                <td>BRL</td>
+                <td>{ el.exchangeRates[currency].name }</td>
                 <td>edit</td>
               </tr>);
           })}
