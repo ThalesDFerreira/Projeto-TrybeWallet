@@ -21,6 +21,7 @@ class Wallet extends React.Component {
 
   componentDidMount() {
     this.fetchApiCurrencies();
+    this.sumValue();
   }
 
   fetchApiCurrencies = () => {
@@ -89,14 +90,18 @@ class Wallet extends React.Component {
 
   sumValue = async () => {
     const { getWalletExpenses } = this.props;
-    const valorDosElementos = getWalletExpenses.map((element) => {
-      const { currency } = element;
-      return ((element.value)
-      * (element.exchangeRates[currency].ask));
-    });
-    const somaTotalElementos = valorDosElementos.reduce((crr, acc) => (
-      ((crr) + (acc))));
-    this.setState({ total: somaTotalElementos.toFixed(2) });
+    // const valorDosElementos = getWalletExpenses.map((element) => {
+    //   const { currency } = element;
+    //   return ((element.value)
+    //   * (element.exchangeRates[currency].ask));
+    // });
+    const somaTotalElementos = getWalletExpenses.reduce((acc, crr) => {
+      const soma = crr.value * crr.exchangeRates[crr.currency].ask;
+      acc += soma;
+      return acc;
+    }, 0);
+    // return somaTotalElementos;
+    this.setState({ total: somaTotalElementos });
   }
 
   render() {
