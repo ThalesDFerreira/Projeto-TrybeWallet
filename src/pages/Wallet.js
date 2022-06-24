@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { currenciesWallet, expensesWallet } from '../actions';
+import TableWallet from '../components/TableWallet';
 
 const ALIMENTACAO = 'Alimentação';
 
@@ -58,8 +59,10 @@ class Wallet extends React.Component {
   saveExpenses = async (event) => {
     event.preventDefault();
     await this.fetchApiAllCurrencies();
-    const { id, value, currency, method, tag, description, exchangeRates } = this.state;
-    const newExpenses = { id, value, currency, method, tag, description, exchangeRates };
+    const {
+      id, value, currency, method, tag, description, exchangeRates } = this.state;
+    const newExpenses = {
+      id, value, currency, method, tag, description, exchangeRates };
     const { walletExpenses } = this.props;
     await walletExpenses(newExpenses);
     const { getWalletExpenses } = this.props;
@@ -80,7 +83,7 @@ class Wallet extends React.Component {
     });
   }
 
-  sumValue = () => {
+  sumValue = async () => {
     const { getWalletExpenses } = this.props;
     const valorDosElementos = getWalletExpenses.map((element) => {
       const { currency } = element;
@@ -200,6 +203,7 @@ class Wallet extends React.Component {
             Adicionar despesa
           </button>
         </form>
+        <TableWallet />
       </div>
     );
   }
